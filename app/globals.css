@@ -6,12 +6,18 @@
   --light-grey: #E0E0E0;
   --purple: #7737FE;
   --dark-purple: #63278D;
+  --sidebar-color: #0f0f0f;
+  --sidebar-hover-color: #171717;
+  --hover-foreground: #ededed;
 }
 
 
 .dark {
   --background: #0f0f0f;
   --foreground: #ededed;
+  --sidebar-color: #E0E0E0;
+  --sidebar-hover-color: #ededed;
+  --hover-foreground: #0f0f0f;
 }
 
 
@@ -21,10 +27,14 @@
   --color-light-grey: var(--light-grey);
   --color-dark-purple-hover: var(--dark-purple);
   --color-light-purple: var(--purple);
+  --color-dark: #0f0f0f;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-inter: var(--font-inter);
-  --spacing-navbar: 320px;
+  --spacing-navbar: 240px;
+  --color-side-border: var(--sidebar-color);
+  --color-hover-sidebar: var(--sidebar-hover-color);
+  --color-hover-text: var(--hover-foreground);
 }
 
 body {
@@ -69,5 +79,57 @@ body {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
+  }
+
+  .grey-border {
+    border-right: 2px solid #d1d5dc;
+  }
+
+  .dark-border {
+    border-right: 2px solid #0f0f0f;
+  }
+
+  .sidebar-right-border {
+    border-right: 1px solid var(--sidebar-color);
+  }
+
+  .glass-link {
+    /* Layout & Shape */
+    @apply mx-3 border border-transparent px-4 transition-all duration-300 ease-out;
+
+    /* Text Color */
+    color: var(--foreground);
+
+    /* Default State (Subtle or Transparent) */
+    background: transparent;
+
+    /* HOVER STATE: The Glass Effect */
+    &:hover {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px); /* Safari support */
+      transform: translateX(4px); /* Subtle movement hint */
+    }
+  }
+
+  /* LIGHT MODE HOVER: White-ish Glass */
+  /* Uses your --purple variable for a subtle brand tint if desired, or pure white */
+  .glass-link:hover {
+    background: rgba(119, 55, 254, 0.05); /* Very faint purple tint */
+    border-color: rgba(119, 55, 254, 0.2); /* Subtle purple border */
+    box-shadow: 0 4px 20px rgba(119, 55, 254, 0.1);
+  }
+
+  /* DARK MODE HOVER: Dark Glass */
+  .dark .glass-link:hover {
+    background: rgba(255, 255, 255, 0.05); /* White tint on dark */
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* OPTIONAL: Active/Current Page State styling (stronger glass) */
+  .glass-link.active {
+    background: rgba(119, 55, 254, 0.1);
+    border-color: rgba(119, 55, 254, 0.4);
+    font-weight: 600;
   }
 }
