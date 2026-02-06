@@ -106,8 +106,7 @@ body {
     /* HOVER STATE: The Glass Effect */
     &:hover {
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px); /* Safari support */
-      transform: translateX(4px); /* Subtle movement hint */
+      -webkit-backdrop-filter: blur(12px); /* Safari support */ /* Subtle movement hint */
     }
   }
 
@@ -131,5 +130,13 @@ body {
     background: rgba(119, 55, 254, 0.1);
     border-color: rgba(119, 55, 254, 0.4);
     font-weight: 600;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }

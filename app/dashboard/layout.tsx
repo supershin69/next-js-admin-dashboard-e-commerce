@@ -13,7 +13,7 @@ export default function DashboardLayout({children}: { children: React.ReactNode}
             <div className="flex flex-col overflow-hidden h-screen">
                 <Navbar/>
                 <div className="flex flex-1 overflow-hidden">
-                    <aside className="w-64 h-full overflow-y-auto sidebar-right-border">
+                    <aside className="hidden sm:block w-64 h-full overflow-y-auto sidebar-right-border no-scrollbar">
                         <Sidebar/>
                     </aside>
                     <main className="flex-1 overflow-y-auto px-6">

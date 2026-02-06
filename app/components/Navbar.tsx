@@ -23,7 +23,7 @@ const Navbar = () => {
   
 
   return (
-    <nav className={`flex justify-between items-center px-2 md:px-16 lg:px-navbar h-16 shadow-sm ${isDark && 'shadow-gray-300'}`}>
+    <nav className={`flex justify-between items-center px-2 md:px-16 lg:px-navbar h-16 border-b border-gray-200 ${isDark && 'shadow-gray-300'}`}>
         <h1 className="text-xl md:text-3xl font-bold">DigitalHub</h1>
         <div className="flex gap-2 md:gap-4 justify-center items-center">
           <FontAwesomeIcon className={`text-lg md:text-2xl ${!isDark && 'text-yellow-500'}`} icon={faSun}/>
