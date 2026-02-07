@@ -3,7 +3,8 @@ export type OrderWithProfile = {
   status: string;
   payment_status: string;
   total_amount: number;
-  shipping_address: string;
+  street: string;
+  city: string;
   created_at: string;
   updated_at: string;
   profiles: { user_id: string; name: string }[] | { user_id: string; name: string } | null;

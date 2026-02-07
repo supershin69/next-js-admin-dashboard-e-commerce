@@ -4,7 +4,8 @@ export default interface PendingOrderModel {
     status: string;
     payment_status: string;
     total_amount: number;
-    shipping_address: string;
+    street: string;
+    city: string;
     created_at: string;
     updated_at: string;
 }

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useTheme from "../zustand/themeStore";

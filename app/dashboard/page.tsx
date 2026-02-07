@@ -6,11 +6,13 @@ import { fetchLowStockItems } from "../lib/fetchLowStockItem";
 import { fetchWaitingOrders } from "../lib/fetchWaitingOrders";
 import { PaginationControls } from "../components/PaginationControls";
 import TrendCard from "../components/TrendCard";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
-
-const userCount = 5;
-const caption = "Total Users";
-const percentage = 30;
+import { faArrowTrendDown, faArrowTrendUp, faMobile, faShoppingBag, faUser } from "@fortawesome/free-solid-svg-icons";
+import { fetchTotalUsers } from "../lib/fetchTotalUsers";
+import { fetchLowStockItemCount } from "../lib/fetchLowStockItemCount";
+import { fetchPendingOrderCount } from "../lib/fetchPendingOrderCount";
+import { fetchTodayOrderCount } from "../lib/fetchTodayOrderCount";
+import { fetchYesterdayOrderCount } from "../lib/fetchYesterdayOrderCount";
+import { getOrderCountComparison } from "../lib/orderComparison";
 
 
 
@@ -18,6 +20,12 @@ const Dashboard = () => {
   const [waitingOrders, setWaitingOrders] = useState<PendingOrderModel[]>([]);
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalUserCount, setTotalUserCount] = useState<number>(0);
+  const [lowStockItemCount, setLowStockItemCount] = useState<number>(0);
+  const [pendingOrderCount, setPendingOrderCount] = useState<number>(0);
+  const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
+  const [yesterdayOrderCount, setYesterdayOrderCount] = useState<number>(0);
+  const [percentage, setPercentage] = useState<number>(0);
 
   // --- Pagination State ---
   const [orderPage, setOrderPage] = useState(1);
@@ -55,6 +63,38 @@ const Dashboard = () => {
     getData();
   }, []);
 
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        setLoading(true);
+
+        const [userCount, lowStockItemCount, pendingOrderCount, todayOrderCount, yesterdayOrderCount] = await Promise.all([
+          fetchTotalUsers(),
+          fetchLowStockItemCount(),
+          fetchPendingOrderCount(),
+          fetchTodayOrderCount(),
+          fetchYesterdayOrderCount()
+        ]);
+
+        const percentageCount = getOrderCountComparison(todayOrderCount, yesterdayOrderCount);
+
+        setTotalUserCount(userCount);
+        setLowStockItemCount(lowStockItemCount);
+        setPendingOrderCount(pendingOrderCount);
+        setTodayOrderCount(todayOrderCount);
+        setYesterdayOrderCount(yesterdayOrderCount);
+        setPercentage(percentageCount);
+
+      } catch (error) {
+        console.log('Fetching data failed: ', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCounts();
+  }, []);
+
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
@@ -66,10 +106,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen w-full bg-background p-6 text-foreground transition-colors duration-300">
       <div className="w-full grid place-items-center p-4 grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-8">
-        <TrendCard icon={faUser} amount={userCount} caption={caption}/>
-        <TrendCard icon={faUser} amount={userCount} caption={caption}/>
-        <TrendCard icon={faUser} amount={userCount} caption={caption}/>
-        <TrendCard icon={faUser} amount={userCount} caption={caption}/>
+        <TrendCard icon={percentage < 0 ? faArrowTrendDown : faArrowTrendUp} amount={todayOrderCount} caption="Orders Today" percentage={percentage} />
+        <TrendCard icon={faUser} amount={totalUserCount} caption="Total Users" />
+        <TrendCard icon={faShoppingBag} amount={pendingOrderCount} caption="Pending Orders" />
+        <TrendCard icon={faMobile} amount={lowStockItemCount} caption="Low Stock Items" />
       </div>
       
       {/* Section: Pending Orders */}
@@ -114,8 +154,8 @@ const Dashboard = () => {
                           {order.payment_status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={order.shipping_address}>
-                        {order.shipping_address}
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={`${order.street}, ${order.city}`}>
+                        {order.street}, {order.city}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-gray-400">
                         {new Date(order.created_at).toLocaleDateString()}

@@ -1,5 +1,5 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import TrendCardProps from "../interfaces/trendCardProps"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import TrendCardProps from "../interfaces/trendCardProps";
 
 const TrendCard = ({icon, amount, caption, percentage}: TrendCardProps) => {
   return (
@@ -20,4 +20,4 @@ const TrendCard = ({icon, amount, caption, percentage}: TrendCardProps) => {
     </div>
   )
 }
-export default TrendCard
+export default TrendCard;

@@ -5,7 +5,7 @@ import PendingOrderModel from "../interfaces/pendingOrderModel";
 export const fetchWaitingOrders = async (): Promise<PendingOrderModel[]> => {
     const { data, error } = await client
                                 .from('orders')
-                                .select(`id, status, payment_status, total_amount, shipping_address, created_at, updated_at, profiles(user_id, name)`)
+                                .select(`id, status, payment_status, total_amount, street: shipping_address->>street, city: shipping_address->>city, created_at, updated_at, profiles(user_id, name)`)
                                 .eq('status', 'pending');
 
     if (error) {
@@ -30,7 +30,8 @@ export const fetchWaitingOrders = async (): Promise<PendingOrderModel[]> => {
             status: order.status,
             payment_status: order.payment_status,
             total_amount: order.total_amount,
-            shipping_address: order.shipping_address ?? '—',
+            street: order.street ?? '—',
+            city: order.city ?? '—',
             created_at: order.created_at,
             updated_at: order.updated_at
         };
