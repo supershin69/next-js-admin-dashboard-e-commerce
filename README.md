@@ -47,9 +47,9 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
     ## Sample Photos
 
-    <img src="https:/raw.githubusercontent.com/supershin69/next-js-admin-dashboard-e-commerce/main/public/img/login_form_screenshot.png" alt="Login Screen" width="480" height="300"><br>
-    <img src="https:/raw.githubusercontent.com/supershin69/next-js-admin-dashboard-e-commerce/main/public/img/light_theme_dashboard_screenshot.png" alt="Login Screen" width="480" height="300"><br>
-    <img src="https:/raw.githubusercontent.com/supershin69/next-js-admin-dashboard-e-commerce/main/public/img/dark_theme_dashboard_screenshot.png" alt="Login Screen" width="480" height="300">
+    ![Login Screen](public/img/login_form_screenshot.png)
+    ![Dark Theme Dashboard](public/img/dark_theme_dashboard_screenshot.png)
+    ![Light Theme Dashboard](public/img/light_theme_dashboard_screenshot.png)
 
 
 ## User Page
