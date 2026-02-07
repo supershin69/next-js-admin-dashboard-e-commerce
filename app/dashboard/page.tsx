@@ -128,6 +128,8 @@ const Dashboard = () => {
                   <th className="px-6 py-4 font-semibold">Total</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold">Payment</th>
+                  <th className="px-6 py-4 font-semibold">Shipping Method</th>
+                  <th className="px-6 py-4 font-semibold">Payment Method</th>
                   <th className="px-6 py-4 font-semibold">Address</th>
                   <th className="px-6 py-4 font-semibold">Created</th>
                 </tr>
@@ -153,6 +155,12 @@ const Dashboard = () => {
                          <span className={`inline-flex items-center rounded-md ${order.payment_status == 'pending' && 'bg-yellow-400'} ${order.payment_status == 'paid' && 'bg-green-400'} ${order.payment_status == 'failed' && 'bg-red-500'} text-white px-2 py-1 text-sm font-medium`}>
                           {order.payment_status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={order.shipping_method}>
+                        {order.shipping_method}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={order.payment_method}>
+                        {order.payment_method}
                       </td>
                       <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={`${order.street}, ${order.city}`}>
                         {order.street}, {order.city}
