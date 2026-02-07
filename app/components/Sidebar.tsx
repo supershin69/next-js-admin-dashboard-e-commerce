@@ -5,6 +5,7 @@ import Image from "next/image";
 import ProfilePic from '@/public/img/person-test.jpeg';
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { logout } from "../lib/logout";
 
 const Sidebar = () => {
     const pathname = usePathname();
@@ -16,6 +17,7 @@ const Sidebar = () => {
         { name: "Orders", href: "/dashboard/orders"},
         { name: "Analytics", href: "/dashboard/analytics"},
     ];
+    const profileLink = '/dashboard/profile';
     const [ isOpen, setIsOpen ] = useState(true);
     const toggleOpen = () => {
       setIsOpen((prev) => !prev);
@@ -34,8 +36,8 @@ const Sidebar = () => {
    <div className="w-full">
       {/* 1. This container holds the text and shrinks to 0 */}
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-28 border-t border-gray-100' : 'max-h-0'}`}>
-        <h1 className="h-14 flex justify-center items-center">Hello</h1>
-        <h1 className="h-14 flex justify-center items-center">Bro</h1>
+        <Link href={profileLink} className="h-14 flex justify-center items-center hover:text-background hover:bg-foreground">Profile</Link>
+        <button className="h-14 flex justify-center items-center w-full hover:text-background hover:bg-foreground" onClick={logout}>Log Out</button>
       </div>
 
       {/* 2. This button is ALWAYS outside the shrinking div, so it stays visible at the bottom */}

@@ -34,6 +34,14 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
     - A page for managing Orders
 - All sub-functions (CRUD) will be done in that same specific pages via popup modals or updating directly via tables.
 
+## Login Screen
+
+- Login/Logout by supabase with email and password
+
+    ## Sample Photos
+
+    ![Login Screen](public/img/login_form_screenshot.png)
+
 ## Main Dashboard Page
 
 - Here, you will find 4 cards and 2 tables. 
@@ -47,8 +55,8 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
     ## Sample Photos
 
-    ![Login Screen](public/img/login_form_screenshot.png)
     ![Dark Theme Dashboard](public/img/dark_theme_dashboard_screenshot.png)
+
     ![Light Theme Dashboard](public/img/light_theme_dashboard_screenshot.png)
 
 
