@@ -1,6 +1,12 @@
 import PendingOrderModel from "../interfaces/pendingOrderModel"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { PendingOrderActionHandler } from "../types/rowOperationTypes";
 
-export const pendingOrderColumns = [
+export const pendingOrderColumns = ({
+  onEdit,
+  onDelete
+}: PendingOrderActionHandler) => [
   {
     header: "ID",
     cell: (o: PendingOrderModel) => o.id,
@@ -59,4 +65,28 @@ export const pendingOrderColumns = [
     cell: (o: PendingOrderModel) => new Date(o.created_at).toLocaleDateString(),
     className: "whitespace-nowrap text-gray-500 dark:text-gray-400",
   },
+  {
+    header: "Actions",
+    className: "text-right",
+    cell: (o: PendingOrderModel) => (
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => onEdit(o)}
+          className="rounded-md p-2 text-purple-600 hover:bg-purple-100 dark:hover:bg-white/10"
+          title="Edit"
+        >
+          <FontAwesomeIcon icon={faPenToSquare} />
+        </button>
+
+        <button
+          onClick={() => onDelete(o)}
+          className="rounded-md p-2 text-red-600 hover:bg-red-100 dark:hover:bg-white/10"
+          title="Delete"
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </button>
+      </div>
+    ),
+  },
+
 ];

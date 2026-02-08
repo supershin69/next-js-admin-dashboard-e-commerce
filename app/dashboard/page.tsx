@@ -17,6 +17,10 @@ import { pendingOrderColumns } from "../tableColumnData/PendingOrderColumns";
 import { lowStockColumns } from "../tableColumnData/LowStockItemColumns";
 
 const Dashboard = () => {
+  const [selectedOrder, setSelectedOrder] = useState<PendingOrderModel | LowStockItem | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const [waitingOrders, setWaitingOrders] = useState<PendingOrderModel[]>([]);
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +119,17 @@ const Dashboard = () => {
       {/* Section: Pending Orders */}
       <DataTable 
         title="Pending Orders"
-        columns={pendingOrderColumns}
+        columns={pendingOrderColumns({
+          onEdit: (order) => {
+            setSelectedOrder(order);
+            setIsEditOpen(true);
+          },
+          onDelete: (order) => {
+            setSelectedOrder(order);
+            setIsDeleteOpen(true);
+            console.log('Order ID: ', order.id);
+          }
+        })}
         data={currentOrders}
         emptyText="No pending orders are found"
         pagination={{
@@ -129,8 +143,18 @@ const Dashboard = () => {
       {/* Section: Low Stock Items */}
       <DataTable
         title="Low Stock Alert"
-        columns={lowStockColumns}
-        data={currentStock}    // ← comes from your existing logic
+        columns={lowStockColumns({
+          onEdit: (item) => {
+            setSelectedOrder(item);
+            setIsEditOpen(true);
+          },
+          onDelete: (item) => {
+            setSelectedOrder(item);
+            setIsDeleteOpen(true);
+            console.log("item ID: ",item.id);
+          }
+        })}
+        data={currentStock}    
         emptyText="Stock levels are healthy."
         pagination={{
           totalItems: lowStockItems.length,

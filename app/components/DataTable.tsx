@@ -10,7 +10,7 @@ export function DataTable<T>({
   pagination,
 }: DataTableProps<T>) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-4">
       <h2 className="text-xl font-bold tracking-tight text-foreground">
         {title}
       </h2>
