@@ -4,7 +4,6 @@ import PendingOrderModel from "../interfaces/pendingOrderModel";
 import LowStockItem from "../interfaces/lowStockItem";
 import { fetchLowStockItems } from "../lib/fetchLowStockItem";
 import { fetchWaitingOrders } from "../lib/fetchWaitingOrders";
-import { PaginationControls } from "../components/PaginationControls";
 import TrendCard from "../components/TrendCard";
 import { faArrowTrendDown, faArrowTrendUp, faMobile, faShoppingBag, faUser } from "@fortawesome/free-solid-svg-icons";
 import { fetchTotalUsers } from "../lib/fetchTotalUsers";
@@ -13,8 +12,9 @@ import { fetchPendingOrderCount } from "../lib/fetchPendingOrderCount";
 import { fetchTodayOrderCount } from "../lib/fetchTodayOrderCount";
 import { fetchYesterdayOrderCount } from "../lib/fetchYesterdayOrderCount";
 import { getOrderCountComparison } from "../lib/orderComparison";
-
-
+import { DataTable } from "../components/DataTable";
+import { pendingOrderColumns } from "../tableColumnData/PendingOrderColumns";
+import { lowStockColumns } from "../tableColumnData/LowStockItemColumns";
 
 const Dashboard = () => {
   const [waitingOrders, setWaitingOrders] = useState<PendingOrderModel[]>([]);
@@ -113,136 +113,32 @@ const Dashboard = () => {
       </div>
       
       {/* Section: Pending Orders */}
-      <div className="mb-8 space-y-4">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Pending Orders
-        </h2>
-        
-        <div className="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm dark:border-white/10">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 dark:bg-white/5 dark:text-gray-400">
-                <tr>
-                  <th className="px-6 py-4 font-semibold">ID</th>
-                  <th className="px-6 py-4 font-semibold">Name</th>
-                  <th className="px-6 py-4 font-semibold">Total</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
-                  <th className="px-6 py-4 font-semibold">Payment</th>
-                  <th className="px-6 py-4 font-semibold">Shipping Method</th>
-                  <th className="px-6 py-4 font-semibold">Payment Method</th>
-                  <th className="px-6 py-4 font-semibold">Address</th>
-                  <th className="px-6 py-4 font-semibold">Created</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-white/10">
-                {currentOrders.length > 0 ? (
-                  currentOrders.map((order) => (
-                    <tr 
-                      key={order.id} 
-                      className="group transition-colors hover:bg-light-purple/5 dark:hover:bg-white/5"
-                    >
-                      <td className="whitespace-nowrap px-6 py-4 font-medium">{order.id}</td>
-                      <td className="px-6 py-4">{order.name}</td>
-                      <td className="px-6 py-4 font-medium text-light-purple">
-                        {order.total_amount}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium dark:bg-yellow-400/90 dark:text-white">
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                         <span className={`inline-flex items-center rounded-md ${order.payment_status == 'pending' && 'bg-yellow-400'} ${order.payment_status == 'paid' && 'bg-green-400'} ${order.payment_status == 'failed' && 'bg-red-500'} text-white px-2 py-1 text-sm font-medium`}>
-                          {order.payment_status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={order.shipping_method}>
-                        {order.shipping_method}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={order.payment_method}>
-                        {order.payment_method}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-36 truncate" title={`${order.street}, ${order.city}`}>
-                        {order.street}, {order.city}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-gray-400">
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                      No pending orders found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          {/* Pagination Controls for Orders */}
-          <PaginationControls 
-            totalItems={waitingOrders.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            currentPage={orderPage}
-            setCurrentPage={setOrderPage}
-          />
-        </div>
-      </div>
+      <DataTable 
+        title="Pending Orders"
+        columns={pendingOrderColumns}
+        data={currentOrders}
+        emptyText="No pending orders are found"
+        pagination={{
+          totalItems: waitingOrders.length,
+          itemsPerPage: ITEMS_PER_PAGE,
+          currentPage: orderPage,
+          setCurrentPage: setOrderPage,
+        }}
+      />
 
       {/* Section: Low Stock Items */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Low Stock Alert
-        </h2>
-
-        <div className="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm dark:border-white/10">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 dark:bg-white/5 dark:text-gray-400">
-                <tr>
-                  <th className="px-6 py-4 font-semibold">ID</th>
-                  <th className="px-6 py-4 font-semibold">SKU</th>
-                  <th className="px-6 py-4 font-semibold">Quantity</th>
-                  <th className="px-6 py-4 font-semibold">Updated</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-white/10">
-                {currentStock.length > 0 ? (
-                  currentStock.map((item) => (
-                    <tr 
-                      key={item.id} 
-                      className="transition-colors hover:bg-red-50 dark:hover:bg-red-900/10"
-                    >
-                      <td className="whitespace-nowrap px-6 py-4 font-medium">{item.id}</td>
-                      <td className="px-6 py-4 font-mono text-xs">{item.sku}</td>
-                      <td className="px-6 py-4 font-bold text-red-600 dark:text-red-400">
-                        {item.quantity}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-gray-400">
-                        {new Date(item.updated_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                      Stock levels are healthy.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          {/* Pagination Controls for Stock */}
-          <PaginationControls 
-            totalItems={lowStockItems.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            currentPage={stockPage}
-            setCurrentPage={setStockPage}
-          />
-        </div>
-      </div>
+      <DataTable
+        title="Low Stock Alert"
+        columns={lowStockColumns}
+        data={currentStock}    // ← comes from your existing logic
+        emptyText="Stock levels are healthy."
+        pagination={{
+          totalItems: lowStockItems.length,
+          itemsPerPage: ITEMS_PER_PAGE,
+          currentPage: stockPage,
+          setCurrentPage: setStockPage,
+        }}
+      />
     </div>
   );
 };
