@@ -16,26 +16,26 @@ export const PaginationControls = ({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/5 sm:px-6">
+    <div className="flex items-center justify-between border-t border-gray-200 bg-background px-4 py-3 sm:px-6">
       <div className="flex flex-1 justify-between sm:hidden">
         <button
           onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-transparent dark:text-gray-300"
+          className="relative inline-flex items-center rounded-md border border-gray-300 bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-gray-50 disabled:opacity-50"
         >
           Previous
         </button>
         <button
           onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-transparent dark:text-gray-300"
+          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-gray-50 disabled:opacity-50"
         >
           Next
         </button>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm text-gray-700 dark:text-gray-400">
+          <p className="text-sm text-foreground">
             Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
             <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span> of{" "}
             <span className="font-medium">{totalItems}</span> results
@@ -46,7 +46,7 @@ export const PaginationControls = ({
             <button
               onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
               disabled={currentPage === 1}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 dark:ring-white/10 dark:hover:bg-white/5"
+              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
             >
               <span className="sr-only">Previous</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -63,7 +63,7 @@ export const PaginationControls = ({
                 className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ${
                   currentPage === i + 1
                     ? 'z-10 bg-light-purple text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/5'
+                    : 'text-foreground ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
                 }`}
               >
                 {i + 1}
@@ -73,7 +73,7 @@ export const PaginationControls = ({
             <button
               onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 dark:ring-white/10 dark:hover:bg-white/5"
+              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
             >
               <span className="sr-only">Next</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

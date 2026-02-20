@@ -12,15 +12,67 @@ import { fetchPendingOrderCount } from "../lib/fetchPendingOrderCount";
 import { fetchTodayOrderCount } from "../lib/fetchTodayOrderCount";
 import { fetchYesterdayOrderCount } from "../lib/fetchYesterdayOrderCount";
 import { getOrderCountComparison } from "../lib/orderComparison";
-import { DataTable } from "../components/DataTable";
-import { pendingOrderColumns } from "../tableColumnData/PendingOrderColumns";
-import { lowStockColumns } from "../tableColumnData/LowStockItemColumns";
+import { ShadcnColumn, ShadcnDataTable } from "../components/ShadcnDataTable";
+import { Badge } from "../components/ui/badge";
+import { deleteOrders } from "../lib/deleteOrders";
+import { deleteProductVariants } from "../lib/deleteProductVariants";
+
+const pendingOrderColumns: ShadcnColumn<PendingOrderModel>[] = [
+  {
+    key: "id",
+    header: "Order ID",
+    cell: (order) => <span className="font-mono text-xs">{order.id}</span>,
+  },
+  {
+    key: "name",
+    header: "Customer",
+    cell: (order) => order.name,
+  },
+  {
+    key: "total_amount",
+    header: "Total",
+    cell: (order) => `MMK ${(order.total_amount / 100).toLocaleString()}`,
+  },
+  {
+    key: "status",
+    header: "Status",
+    cell: (order) => <Badge variant="warning">{order.status}</Badge>,
+  },
+  {
+    key: "created_at",
+    header: "Created",
+    cell: (order) => new Date(order.created_at).toLocaleDateString(),
+  },
+];
+
+const lowStockColumns: ShadcnColumn<LowStockItem>[] = [
+  {
+    key: "id",
+    header: "Variant ID",
+    cell: (item) => <span className="font-mono text-xs">{item.id}</span>,
+  },
+  {
+    key: "sku",
+    header: "SKU",
+    cell: (item) => item.sku,
+  },
+  {
+    key: "quantity",
+    header: "Quantity",
+    cell: (item) => (
+      <Badge variant={item.quantity <= 3 ? "danger" : "warning"}>
+        {item.quantity}
+      </Badge>
+    ),
+  },
+  {
+    key: "updated_at",
+    header: "Updated",
+    cell: (item) => new Date(item.updated_at).toLocaleDateString(),
+  },
+];
 
 const Dashboard = () => {
-  const [selectedOrder, setSelectedOrder] = useState<PendingOrderModel | LowStockItem | null>(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
   const [waitingOrders, setWaitingOrders] = useState<PendingOrderModel[]>([]);
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,24 +80,10 @@ const Dashboard = () => {
   const [lowStockItemCount, setLowStockItemCount] = useState<number>(0);
   const [pendingOrderCount, setPendingOrderCount] = useState<number>(0);
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
-  const [yesterdayOrderCount, setYesterdayOrderCount] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
-
-  // --- Pagination State ---
-  const [orderPage, setOrderPage] = useState(1);
-  const [stockPage, setStockPage] = useState(1);
-  const ITEMS_PER_PAGE = 5;
-
-  // --- Derived State (Slicing the arrays) ---
-  const currentOrders = waitingOrders.slice(
-    (orderPage - 1) * ITEMS_PER_PAGE,
-    orderPage * ITEMS_PER_PAGE
-  );
-
-  const currentStock = lowStockItems.slice(
-    (stockPage - 1) * ITEMS_PER_PAGE,
-    stockPage * ITEMS_PER_PAGE
-  );
+  const [deletingOrders, setDeletingOrders] = useState(false);
+  const [deletingStock, setDeletingStock] = useState(false);
+  const [tableError, setTableError] = useState("");
 
   useEffect(() => {
     const getData = async () => {
@@ -86,7 +124,6 @@ const Dashboard = () => {
         setLowStockItemCount(lowStockItemCount);
         setPendingOrderCount(pendingOrderCount);
         setTodayOrderCount(todayOrderCount);
-        setYesterdayOrderCount(yesterdayOrderCount);
         setPercentage(percentageCount);
 
       } catch (error) {
@@ -98,6 +135,31 @@ const Dashboard = () => {
     fetchCounts();
   }, []);
 
+  const handleDeleteOrders = async (ids: string[]) => {
+    setDeletingOrders(true);
+    setTableError("");
+    try {
+      await deleteOrders(ids);
+      setWaitingOrders((prev) => prev.filter((row) => !ids.includes(row.id)));
+    } catch (error) {
+      setTableError(error instanceof Error ? error.message : "Failed to delete orders");
+    } finally {
+      setDeletingOrders(false);
+    }
+  };
+
+  const handleDeleteStockItems = async (ids: string[]) => {
+    setDeletingStock(true);
+    setTableError("");
+    try {
+      await deleteProductVariants(ids);
+      setLowStockItems((prev) => prev.filter((row) => !ids.includes(row.id)));
+    } catch (error) {
+      setTableError(error instanceof Error ? error.message : "Failed to delete variants");
+    } finally {
+      setDeletingStock(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -115,53 +177,36 @@ const Dashboard = () => {
         <TrendCard icon={faShoppingBag} amount={pendingOrderCount} caption="Pending Orders" />
         <TrendCard icon={faMobile} amount={lowStockItemCount} caption="Low Stock Items" />
       </div>
-      
-      {/* Section: Pending Orders */}
-      <DataTable 
+
+      {tableError && <p className="mb-3 text-sm text-red-600">{tableError}</p>}
+
+      <ShadcnDataTable
         title="Pending Orders"
-        columns={pendingOrderColumns({
-          onEdit: (order) => {
-            setSelectedOrder(order);
-            setIsEditOpen(true);
-          },
-          onDelete: (order) => {
-            setSelectedOrder(order);
-            setIsDeleteOpen(true);
-            console.log('Order ID: ', order.id);
-          }
-        })}
-        data={currentOrders}
+        columns={pendingOrderColumns}
+        data={waitingOrders}
+        getRowId={(row) => row.id}
+        getRowName={(row) => row.name}
+        getRowCreatedAt={(row) => row.created_at}
+        getRowCategory={(row) => row.status}
+        onDeleteRows={handleDeleteOrders}
+        deleting={deletingOrders}
         emptyText="No pending orders are found"
-        pagination={{
-          totalItems: waitingOrders.length,
-          itemsPerPage: ITEMS_PER_PAGE,
-          currentPage: orderPage,
-          setCurrentPage: setOrderPage,
-        }}
+        categoryLabel="Status"
+        itemsPerPage={5}
       />
 
-      {/* Section: Low Stock Items */}
-      <DataTable
+      <ShadcnDataTable
         title="Low Stock Alert"
-        columns={lowStockColumns({
-          onEdit: (item) => {
-            setSelectedOrder(item);
-            setIsEditOpen(true);
-          },
-          onDelete: (item) => {
-            setSelectedOrder(item);
-            setIsDeleteOpen(true);
-            console.log("item ID: ",item.id);
-          }
-        })}
-        data={currentStock}    
+        columns={lowStockColumns}
+        data={lowStockItems}
+        getRowId={(row) => row.id}
+        getRowName={(row) => row.sku}
+        getRowCreatedAt={(row) => row.updated_at}
+        getRowCategory={(row) => (row.quantity <= 3 ? "Critical" : "Low")}
+        onDeleteRows={handleDeleteStockItems}
+        deleting={deletingStock}
         emptyText="Stock levels are healthy."
-        pagination={{
-          totalItems: lowStockItems.length,
-          itemsPerPage: ITEMS_PER_PAGE,
-          currentPage: stockPage,
-          setCurrentPage: setStockPage,
-        }}
+        itemsPerPage={5}
       />
     </div>
   );

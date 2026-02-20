@@ -15,7 +15,7 @@ const Sidebar = () => {
         { name: "Categories", href: "/dashboard/categories"},
         { name: "Products", href: "/dashboard/products"},
         { name: "Orders", href: "/dashboard/orders"},
-        { name: "Analytics", href: "/dashboard/analytics"},
+        { name: "Notifications", href: "/dashboard/notifications"},
     ];
     const profileLink = '/dashboard/profile';
     const [ isOpen, setIsOpen ] = useState(true);
