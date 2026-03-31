@@ -20,22 +20,43 @@ const Navbar = () => {
     }
   }, [isDark]);
 
-  
-
   return (
-    <nav className={`flex justify-between items-center px-2 md:px-16 lg:px-navbar h-16 border-b border-gray-200 ${isDark && 'shadow-gray-300'}`}>
-        <h1 className="text-xl md:text-3xl font-bold">DigitalHub</h1>
-        <div className="flex gap-2 md:gap-4 justify-center items-center">
-          <FontAwesomeIcon className={`text-lg md:text-2xl ${!isDark && 'text-yellow-500'}`} icon={faSun}/>
-          <label className="relative inline-block w-15 h-8.5">
-            <input type="checkbox" checked={isDark} onChange={toggleTheme} className="opacity-0 h-0 w-0 switch" />
-            <span className="bg-gray-200 rounded-full absolute cursor-pointer top-0 left-0 right-0 bottom-0 transition-all duration-300 slider"></span>
-            
-        </label>
-        <FontAwesomeIcon className={`text-lg md:text-2xl ${isDark && 'text-blue-400'}`} icon={faMoon}/>
-        </div>
-        
+    <nav className="flex h-18 items-center justify-between border-b border-gray-200 bg-background px-4 md:px-8">
+      <div className="leading-tight">
+        <h1 className="text-xl font-semibold tracking-tight md:text-2xl">DigitalHub</h1>
+        <p className="text-xs text-gray-500 md:text-sm">Admin Dashboard</p>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Toggle theme"
+        onClick={toggleTheme}
+        className="group inline-flex items-center gap-2 rounded-full border border-gray-300 bg-background px-2 py-1.5 text-sm shadow-sm transition-colors hover:bg-gray-50"
+      >
+        <span
+          className={`grid h-7 w-7 place-items-center rounded-full text-xs transition-colors ${
+            !isDark ? "bg-amber-100 text-amber-700" : "text-gray-400"
+          }`}
+        >
+          <FontAwesomeIcon icon={faSun} />
+        </span>
+        <span className="relative h-6 w-12 overflow-hidden rounded-full border border-gray-300 bg-gray-100 transition-colors">
+          <span
+            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              isDark ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
+        </span>
+        <span
+          className={`grid h-7 w-7 place-items-center rounded-full text-xs transition-colors ${
+            isDark ? "bg-blue-100 text-blue-700" : "text-gray-400"
+          }`}
+        >
+          <FontAwesomeIcon icon={faMoon} />
+        </span>
+      </button>
     </nav>
-  )
-}
-export default Navbar
+  );
+};
+
+export default Navbar;

@@ -106,6 +106,16 @@ const Notifications = () => {
         emptyText="No notifications found."
         categoryLabel="Read State"
         itemsPerPage={8}
+        exportFileName="notifications"
+        getExportRow={(row) => ({
+          id: row.id,
+          user_id: row.user_id,
+          title: row.title,
+          body: row.body,
+          sent: row.sent,
+          read: row.read,
+          created_at: row.created_at,
+        })}
       />
     </div>
   );

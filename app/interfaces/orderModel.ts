@@ -4,5 +4,7 @@ export interface OrderModel {
   status: string;
   payment_status: string;
   total_amount: number;
+  delivery_fee_status: string;
+  delivery_fee: number | null;
   created_at: string;
 }

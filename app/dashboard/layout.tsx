@@ -10,13 +10,13 @@ export default function DashboardLayout({children}: { children: React.ReactNode}
     
     return (
         <AuthProvider>
-            <div className="flex flex-col overflow-hidden h-screen">
+            <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
                 <Navbar/>
                 <div className="flex flex-1 overflow-hidden">
-                    <aside className="hidden sm:block w-64 h-full overflow-y-auto sidebar-right-border no-scrollbar">
+                    <aside className="hidden h-full w-72 overflow-y-auto border-r border-gray-200 no-scrollbar sm:block">
                         <Sidebar/>
                     </aside>
-                    <main className="flex-1 overflow-y-auto px-6">
+                    <main className="flex-1 overflow-y-auto px-4 md:px-6">
                         {children}
                     </main>
                     

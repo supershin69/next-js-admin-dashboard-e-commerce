@@ -8,6 +8,8 @@ export default interface PendingOrderModel {
     city: string;
     shipping_method: string;
     payment_method: string;
+    delivery_fee_status: string;
+    delivery_fee: number | null;
     created_at: string;
     updated_at: string;
 }
