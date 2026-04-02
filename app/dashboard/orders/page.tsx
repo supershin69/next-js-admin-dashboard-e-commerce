@@ -69,6 +69,11 @@ const columns: ShadcnColumn<OrderModel>[] = [
         : "—",
   },
   {
+    key: "cod_allowed",
+    header: "COD",
+    cell: (order) => (order.cod_allowed ? "Yes" : "No"),
+  },
+  {
     key: "delivery_fee_status",
     header: "Fee Status",
     cell: (order) => (
@@ -107,7 +112,8 @@ const Orders = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderModel | null>(null);
   const [deliveryFee, setDeliveryFee] = useState("");
-  const [deliveryFeeStatus, setDeliveryFeeStatus] = useState("fee_set");
+  const [deliveryFeeStatus, setDeliveryFeeStatus] = useState("pending_fee");
+  const [codAllowed, setCodAllowed] = useState(false);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
@@ -149,11 +155,11 @@ const Orders = () => {
   };
 
   const openConfirmModal = (order: OrderModel) => {
-    const initialStatus =
-      order.delivery_fee_status === "pending_fee" ? "fee_set" : order.delivery_fee_status;
+    const initialStatus = order.delivery_fee_status || "pending_fee";
     setSelectedOrder(order);
     setDeliveryFee(order.delivery_fee !== null ? String(order.delivery_fee) : "");
     setDeliveryFeeStatus(initialStatus);
+    setCodAllowed(order.cod_allowed ?? false);
     setConfirmError("");
     setConfirmOpen(true);
   };
@@ -162,7 +168,8 @@ const Orders = () => {
     setConfirmOpen(false);
     setSelectedOrder(null);
     setDeliveryFee("");
-    setDeliveryFeeStatus("fee_set");
+    setDeliveryFeeStatus("pending_fee");
+    setCodAllowed(false);
     setConfirmError("");
   };
 
@@ -187,10 +194,10 @@ const Orders = () => {
       const payload: Record<string, unknown> = {
         delivery_fee_status: deliveryFeeStatus,
         delivery_fee: feeValue,
+        cod_allowed: codAllowed,
       };
-      if (selectedOrder.status === "pending") {
-        payload.status = "processing";
-      }
+      // Do not automatically change order status to processing on fee set.
+      // Leave status as-is to let the customer accept/reject first.
 
       const { error } = await client
         .from("orders")
@@ -541,6 +548,16 @@ const Orders = () => {
                     </option>
                   ))}
                 </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={codAllowed}
+                  onChange={(event) => setCodAllowed(event.target.checked)}
+                  disabled={confirmingOrder}
+                  className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600"
+                />
+                <span>COD allowed</span>
               </label>
             </div>
             {confirmError && <p className="mt-3 text-sm text-red-600">{confirmError}</p>}

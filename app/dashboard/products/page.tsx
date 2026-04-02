@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faFileImport, faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ShadcnDataTable, ShadcnColumn } from "@/app/components/ShadcnDataTable";
@@ -70,6 +70,17 @@ const Products = () => {
   const [newDescription, setNewDescription] = useState("");
   const [newImageUrls, setNewImageUrls] = useState("");
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editBrandId, setEditBrandId] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editImageUrls, setEditImageUrls] = useState("");
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
+  const [editLoading, setEditLoading] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -107,6 +118,157 @@ const Products = () => {
       setError(deleteError instanceof Error ? deleteError.message : "Delete failed");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const openEditModal = async (productId: string) => {
+    setEditOpen(true);
+    setEditingProductId(productId);
+    setEditLoading(true);
+    setEditError("");
+    setEditImageFiles([]);
+    try {
+      const { data, error: fetchError } = await client
+        .from("products")
+        .select("id, name, category_id, brand_id, description")
+        .eq("id", productId)
+        .single<{
+          id: string;
+          name: string;
+          category_id: string | null;
+          brand_id: string | null;
+          description: string | null;
+        }>();
+
+      if (fetchError || !data) {
+        throw new Error(fetchError?.message ?? "Failed to load product details");
+      }
+
+      setEditName(data.name ?? "");
+      setEditCategoryId(data.category_id ?? "");
+      setEditBrandId(data.brand_id ?? "");
+      setEditDescription(data.description ?? "");
+
+      const { data: imageData, error: imageError } = await client
+        .from("product_images")
+        .select("url, attribute_value_id, sort_order")
+        .eq("product_id", productId)
+        .order("sort_order", { ascending: true });
+
+      if (imageError) {
+        throw new Error(imageError.message);
+      }
+
+      const baseImages = (imageData ?? [])
+        .filter((row) => !row.attribute_value_id)
+        .map((row) => row.url)
+        .filter(Boolean);
+      setEditImageUrls(baseImages.join("\n"));
+    } catch (loadError) {
+      setEditError(loadError instanceof Error ? loadError.message : "Failed to load product");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const closeEditModal = () => {
+    setEditOpen(false);
+    setEditingProductId(null);
+    setEditName("");
+    setEditCategoryId("");
+    setEditBrandId("");
+    setEditDescription("");
+    setEditImageUrls("");
+    setEditImageFiles([]);
+    setEditError("");
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProductId) return;
+    if (!editName.trim() || !editCategoryId || !editBrandId) {
+      setEditError("Name, category, and brand are required.");
+      return;
+    }
+
+    setSavingEdit(true);
+    setEditError("");
+    try {
+      const { data, error: updateError } = await client
+        .from("products")
+        .update({
+          name: editName.trim(),
+          category_id: editCategoryId,
+          brand_id: editBrandId,
+          description: editDescription.trim() || null,
+        })
+        .eq("id", editingProductId)
+        .select("id, name, category_id, brand_id")
+        .single<{
+          id: string;
+          name: string;
+          category_id: string;
+          brand_id: string;
+        }>();
+
+      if (updateError || !data) {
+        throw new Error(updateError?.message ?? "Failed to update product");
+      }
+
+      const externalUrls = parseUrls(editImageUrls);
+      const uploadedLocalUrls = await uploadLocalFiles(editImageFiles, editingProductId);
+      const mergedImageUrls = Array.from(new Set([...externalUrls, ...uploadedLocalUrls]));
+
+      const { error: deleteImagesError } = await client
+        .from("product_images")
+        .delete()
+        .eq("product_id", editingProductId)
+        .is("attribute_value_id", null);
+
+      if (deleteImagesError) {
+        throw new Error(deleteImagesError.message);
+      }
+
+      if (mergedImageUrls.length > 0) {
+        const { error: imageInsertError } = await client.from("product_images").insert(
+          mergedImageUrls.map((url, index) => ({
+            product_id: editingProductId,
+            url,
+            sort_order: index,
+            is_primary: index === 0,
+          }))
+        );
+
+        if (imageInsertError) {
+          throw new Error(imageInsertError.message);
+        }
+      }
+
+      const categoryName =
+        categoryOptions.find((option) => option.id === data.category_id)?.name ??
+        "Uncategorized";
+      const brandName =
+        brandOptions.find((option) => option.id === data.brand_id)?.name ?? "Unknown";
+
+      setProducts((prev) =>
+        prev.map((row) =>
+          row.id === data.id
+            ? {
+                ...row,
+                name: data.name,
+                category_name: categoryName,
+                brand_name: brandName,
+              }
+            : row
+        )
+      );
+
+      closeEditModal();
+    } catch (updateProductError) {
+      setEditError(
+        updateProductError instanceof Error ? updateProductError.message : "Update failed"
+      );
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -346,6 +508,16 @@ const Products = () => {
           brand: row.brand_name,
           created_at: row.created_at,
         })}
+        rowActions={(row) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 text-blue-600 hover:text-blue-700"
+            onClick={() => openEditModal(row.id)}
+          >
+            <FontAwesomeIcon icon={faPenToSquare} />
+          </Button>
+        )}
         toolbarActions={
           <div className="flex items-center gap-2">
             <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
@@ -461,6 +633,115 @@ const Products = () => {
                 {creating ? "Creating..." : "Create Product"}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {editOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onClick={closeEditModal}
+        >
+          <div
+            className="w-full max-w-xl rounded-xl border border-gray-200 bg-background p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold">Update Product</h3>
+            {editLoading ? (
+              <p className="mt-4 text-sm text-gray-600">Loading product details...</p>
+            ) : (
+              <>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <label className="space-y-1 text-sm">
+                    <span>Name</span>
+                    <input
+                      value={editName}
+                      onChange={(event) => setEditName(event.target.value)}
+                      className="h-10 w-full rounded-md border border-gray-300 bg-background px-3"
+                    />
+                  </label>
+                  <label className="space-y-1 text-sm">
+                    <span>Category</span>
+                    <select
+                      value={editCategoryId}
+                      onChange={(event) => setEditCategoryId(event.target.value)}
+                      className="h-10 w-full rounded-md border border-gray-300 bg-background px-3"
+                    >
+                      <option value="">Select category</option>
+                      {categoryOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="space-y-1 text-sm">
+                    <span>Brand</span>
+                    <select
+                      value={editBrandId}
+                      onChange={(event) => setEditBrandId(event.target.value)}
+                      className="h-10 w-full rounded-md border border-gray-300 bg-background px-3"
+                    >
+                      <option value="">Select brand</option>
+                      {brandOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="space-y-1 text-sm md:col-span-2">
+                    <span>Description</span>
+                    <textarea
+                      rows={3}
+                      value={editDescription}
+                      onChange={(event) => setEditDescription(event.target.value)}
+                      className="w-full rounded-md border border-gray-300 bg-background p-2"
+                    />
+                  </label>
+                  <label className="space-y-1 text-sm md:col-span-2">
+                    <span>Image URLs</span>
+                    <textarea
+                      rows={4}
+                      value={editImageUrls}
+                      onChange={(event) => setEditImageUrls(event.target.value)}
+                      placeholder="Paste image URLs (comma or new line separated)"
+                      className="w-full rounded-md border border-gray-300 bg-background p-2"
+                    />
+                  </label>
+                  <label className="space-y-1 text-sm md:col-span-2">
+                    <span>Upload Images from Device (Optional)</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) =>
+                        setEditImageFiles(event.target.files ? Array.from(event.target.files) : [])
+                      }
+                      className="block w-full rounded-md border border-gray-300 bg-background p-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-white hover:file:bg-emerald-800"
+                    />
+                    {editImageFiles.length > 0 && (
+                      <p className="text-xs text-gray-600">
+                        {editImageFiles.length} file(s) selected.
+                      </p>
+                    )}
+                  </label>
+                </div>
+                {editError && <p className="mt-3 text-sm text-red-600">{editError}</p>}
+                <div className="mt-5 flex justify-end gap-2">
+                  <Button variant="outline" onClick={closeEditModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-emerald-700 text-white hover:bg-emerald-800"
+                    onClick={handleUpdateProduct}
+                    disabled={savingEdit}
+                  >
+                    {savingEdit ? "Saving..." : "Update Product"}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

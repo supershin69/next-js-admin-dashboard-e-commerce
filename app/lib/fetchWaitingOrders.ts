@@ -5,8 +5,7 @@ import PendingOrderModel from "../interfaces/pendingOrderModel";
 export const fetchWaitingOrders = async (): Promise<PendingOrderModel[]> => {
     const { data, error } = await client
                                 .from('orders')
-                                .select(`id, status, payment_status, total_amount, delivery_fee_status, delivery_fee, street: shipping_address->>street, city: shipping_address->>city, shipping_method, payment_method, created_at, updated_at, profiles(user_id, name)`)
-                                .eq('status', 'pending');
+    .select(`id, status, payment_status, total_amount, delivery_fee_status, delivery_fee, cod_allowed, street: shipping_address->>street, city: shipping_address->>city, shipping_method, payment_method, created_at, updated_at, profiles(user_id, name)`)
 
     if (error) {
         console.log('Error fetching waiting items: ', error);
@@ -36,6 +35,7 @@ export const fetchWaitingOrders = async (): Promise<PendingOrderModel[]> => {
             payment_method: order.payment_method,
             delivery_fee_status: order.delivery_fee_status ?? "pending_fee",
             delivery_fee: order.delivery_fee ?? null,
+            cod_allowed: order.cod_allowed ?? false,
             created_at: order.created_at,
             updated_at: order.updated_at
         };

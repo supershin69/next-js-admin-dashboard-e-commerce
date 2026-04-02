@@ -65,6 +65,11 @@ const pendingOrderColumns: ShadcnColumn<PendingOrderModel>[] = [
         : "—",
   },
   {
+    key: "cod_allowed",
+    header: "COD",
+    cell: (order) => (order.cod_allowed ? "Yes" : "No"),
+  },
+  {
     key: "delivery_fee_status",
     header: "Fee Status",
     cell: (order) => (
@@ -127,7 +132,8 @@ const Dashboard = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<PendingOrderModel | null>(null);
   const [deliveryFee, setDeliveryFee] = useState("");
-  const [deliveryFeeStatus, setDeliveryFeeStatus] = useState("fee_set");
+  const [deliveryFeeStatus, setDeliveryFeeStatus] = useState("pending_fee");
+  const [codAllowed, setCodAllowed] = useState(false);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
@@ -208,11 +214,11 @@ const Dashboard = () => {
   };
 
   const openConfirmModal = (order: PendingOrderModel) => {
-    const initialStatus =
-      order.delivery_fee_status === "pending_fee" ? "fee_set" : order.delivery_fee_status;
+    const initialStatus = order.delivery_fee_status || "pending_fee";
     setSelectedOrder(order);
     setDeliveryFee(order.delivery_fee !== null ? String(order.delivery_fee) : "");
     setDeliveryFeeStatus(initialStatus);
+    setCodAllowed(order.cod_allowed ?? false);
     setConfirmError("");
     setConfirmOpen(true);
   };
@@ -221,7 +227,8 @@ const Dashboard = () => {
     setConfirmOpen(false);
     setSelectedOrder(null);
     setDeliveryFee("");
-    setDeliveryFeeStatus("fee_set");
+    setDeliveryFeeStatus("pending_fee");
+    setCodAllowed(false);
     setConfirmError("");
   };
 
@@ -246,9 +253,9 @@ const Dashboard = () => {
       const { error } = await client
         .from("orders")
         .update({
-          status: "processing",
           delivery_fee_status: deliveryFeeStatus,
           delivery_fee: feeValue,
+          cod_allowed: codAllowed,
         })
         .eq("id", selectedOrder.id);
 
@@ -390,6 +397,16 @@ const Dashboard = () => {
                     </option>
                   ))}
                 </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={codAllowed}
+                  onChange={(event) => setCodAllowed(event.target.checked)}
+                  disabled={confirmingOrder}
+                  className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600"
+                />
+                <span>COD allowed</span>
               </label>
             </div>
             {confirmError && <p className="mt-3 text-sm text-red-600">{confirmError}</p>}

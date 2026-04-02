@@ -6,5 +6,6 @@ export interface OrderModel {
   total_amount: number;
   delivery_fee_status: string;
   delivery_fee: number | null;
+  cod_allowed: boolean;
   created_at: string;
 }

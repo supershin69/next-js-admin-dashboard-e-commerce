@@ -911,7 +911,7 @@ const Variants = () => {
         data={rows}
         columns={columns}
         getRowId={(row) => row.id}
-        getRowName={(row) => row.sku ?? row.product_name}
+        getRowName={(row) => `${row.product_name} ${row.sku ?? ""}`.trim()}
         getRowCreatedAt={(row) => row.created_at}
         getRowCategory={(row) => row.group_key}
         onDeleteRows={handleDeleteRows}

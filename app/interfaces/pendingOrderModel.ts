@@ -10,6 +10,7 @@ export default interface PendingOrderModel {
     payment_method: string;
     delivery_fee_status: string;
     delivery_fee: number | null;
+    cod_allowed: boolean;
     created_at: string;
     updated_at: string;
 }

@@ -12,13 +12,24 @@ const AuthProvider = ({children}: AuthProdiverInterface) => {
   const [ loading, setLoading ] = useState(true);
 
   useEffect(()=> {
+    let lastUserId: string | null = null;
+
     client.auth.getSession().then(({data}) => {
-      setUser(data?.session?.user || null);
+      const user = data?.session?.user || null;
+      lastUserId = user?.id ?? null;
+      setUser(user);
       setLoading(false);
     });
 
-    const {data: listener} = client.auth.onAuthStateChange((e, session) => {
-      setUser(session?.user || null);
+    const {data: listener} = client.auth.onAuthStateChange((event, session) => {
+      const nextUser = session?.user || null;
+      const nextUserId = nextUser?.id ?? null;
+
+      // Ignore repeated same-user notifications (like token refresh) to avoid app rerender loops
+      if (nextUserId === lastUserId) return;
+
+      lastUserId = nextUserId;
+      setUser(nextUser);
     });
 
     return () => {
