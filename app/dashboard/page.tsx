@@ -237,7 +237,7 @@ const Dashboard = () => {
     const trimmedFee = deliveryFee.trim();
     const feeValue = trimmedFee === "" ? null : Number(trimmedFee);
 
-    if (trimmedFee && (Number.isNaN(feeValue) || feeValue < 0)) {
+    if (feeValue !== null && (Number.isNaN(feeValue) || feeValue < 0)) {
       setConfirmError("Delivery fee must be a non-negative number.");
       return;
     }
