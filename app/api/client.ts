@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
-const client = createClient(
+const client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!, 
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
@@ -11,5 +11,14 @@ const client = createClient(
       },
     }
 );
+
+// @supabase/ssr forces autoRefreshToken=true in the browser; disable it to prevent UI churn.
+if (typeof window !== "undefined") {
+  const authAny = client.auth as { autoRefreshToken?: boolean };
+  if (typeof authAny.autoRefreshToken === "boolean") {
+    authAny.autoRefreshToken = false;
+  }
+  client.auth.stopAutoRefresh().catch(() => {});
+}
 
 export default client;

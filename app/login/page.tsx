@@ -6,9 +6,10 @@ import { FormFields } from "../types/FormFields";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authSchema } from "../zodschema/authSchema";
 import client from "../api/client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 const LoginForm = () => {
     const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<FormFields>({resolver: zodResolver(authSchema)});
+    const router = useRouter();
     const onSubmit = async (loginData: FormFields) => {
         const email = loginData.email;
         const password = loginData.password;
@@ -27,7 +28,7 @@ const LoginForm = () => {
         }
 
         console.log('Login Successful.');
-        redirect("/dashboard");
+        router.push("/dashboard");
     }
 
     const hasError = errors.email || errors.password || errors.root;
