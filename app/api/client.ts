@@ -14,7 +14,7 @@ const client = createBrowserClient(
 
 // @supabase/ssr forces autoRefreshToken=true in the browser; disable it to prevent UI churn.
 if (typeof window !== "undefined") {
-  const authAny = client.auth as { autoRefreshToken?: boolean };
+  const authAny = client.auth as unknown as { autoRefreshToken?: boolean };
   if (typeof authAny.autoRefreshToken === "boolean") {
     authAny.autoRefreshToken = false;
   }
